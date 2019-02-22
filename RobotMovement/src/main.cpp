@@ -45,10 +45,11 @@ void setup() {
   set_R_wheel(0);
 }
 
-void loop() { // motor test code with input from computer
+void loop() { 
   
+  // motor test code with input from computer
   if(Serial.available()) {
-    int val = Serial.parseInt(); // try typing numbers from -255 to 255 into serial
+    int val = Serial.parseInt(); // try typing numbers from -255 to 255 into serial monitor
     Serial.print("You said: ");
     Serial.println(val);
 

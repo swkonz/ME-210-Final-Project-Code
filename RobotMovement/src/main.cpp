@@ -18,7 +18,7 @@
  */
 void set_R_wheel(int speed) {
   digitalWrite(PIN_IN1, speed >= 0);
-  digitalWrite(PIN_IN2, speed < 0);
+  digitalWrite(PIN_IN2, speed <= 0);
   analogWrite(PIN_ENA, abs(speed));
 }
 
@@ -28,7 +28,7 @@ void set_R_wheel(int speed) {
  */
 void set_L_wheel(int speed) {
   digitalWrite(PIN_IN4, speed >= 0);
-  digitalWrite(PIN_IN3, speed < 0);
+  digitalWrite(PIN_IN3, speed <= 0);
   analogWrite(PIN_ENB, abs(speed));
 }
 

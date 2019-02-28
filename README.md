@@ -2,7 +2,7 @@
 Code Repo for Stanford's ME 210 Final project. Building a 'siege-robot' based on specifications provided by the course staff
 
 ## To Use:
-- To pull from the repo `git clone https://github.com/swkonz/ME-210-Final-Project-Code.git
+- To pull from the repo `git clone https://github.com/swkonz/ME-210-Final-Project-Code.git`
 - To push:
 ```
 git add <add the directories or files to track and add to remote>

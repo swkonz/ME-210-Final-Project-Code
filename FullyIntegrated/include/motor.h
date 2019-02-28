@@ -7,9 +7,6 @@
  * which can power the Teensy if you connect Teensy's Vin ("5V") to the LM298N Breakout's +5V.
  */
 
-// hello this is a test
-
-#include <Arduino.h>
 
 #define PIN_ENA 21 // connect this pin to LM298N Breakout, must be PWM
 #define PIN_IN1 20 // connect this pin to LM298N Breakout
@@ -47,7 +44,7 @@ void set_L_wheel(int speed) {
 /**
  * Stop both motor motion
  */
-void stop_motor() {
+void stop_wheels() {
     set_L_wheel(0);
     set_R_wheel(0);
 }
@@ -57,7 +54,6 @@ void stop_motor() {
  */
 
 void motor_setup() {
-      Serial.begin(9600);
   pinMode(PIN_IN1, OUTPUT);
   pinMode(PIN_IN2, OUTPUT);
   pinMode(PIN_IN3, OUTPUT);

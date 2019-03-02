@@ -13,8 +13,8 @@
 
 ////////////////////////////////////////////////////////////
 // Helper CONSTANTS
-const uint8_t STEPS_TO_NEXT_BALL = 30;    // Number of steps for the motor to take in order to load the next ball
-const uint32_t FEEDER_FREQ = 7000;
+const uint8_t STEPS_TO_NEXT_BALL = 70;    // Number of steps for the motor to take in order to load the next ball
+const uint32_t FEEDER_FREQ = 10000;
 
 ////////////////////////////////////////////////////////////
 // Helper global variables
@@ -51,6 +51,8 @@ void toggleOutputSquare() {
  * Load the next ball into the launcher tube
  */
 void load_ball() {
+
+  Serial.println("Loading ball");
   // reset tracking vars
   step_count = 0;
 
@@ -102,6 +104,7 @@ void loop() {
     Serial.println(val);
 
     set_flywheel_speed(val);
+    load_ball();
   }
 
   // control the feeder movement

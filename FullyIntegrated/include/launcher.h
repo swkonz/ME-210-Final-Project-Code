@@ -8,9 +8,7 @@
 // Helper objects for controlling the flywheel launcher
 //-----------------------------------------------------------------
 // Flywheel pin definitions
-#define PIN_FLY_ENA 5 // connect this pin to LM298N Breakout, must be PWM
-#define PIN_FLY_IN1 4 // connect this pin to LM298N Breakout
-#define PIN_FLY_IN2 16 // connect this pin to LM298N Breakout
+#define PIN_FLY_EN 4 // connect this pin to LM298N Breakout
 
 //-----------------------------------------------------------------
 // Function prototypes
@@ -21,9 +19,7 @@ void set_flywheel_speed(int speed);
  */
 void setup_flywheel() {
     // setup Flywheel pins
-    pinMode(PIN_FLY_IN1, OUTPUT);
-    pinMode(PIN_FLY_IN2, OUTPUT);
-    pinMode(PIN_FLY_ENA, OUTPUT);
+    pinMode(PIN_FLY_EN, OUTPUT);
 
     // setup flywheel initial   
     set_flywheel_speed(0);
@@ -39,12 +35,17 @@ void setup_flywheel() {
  *      - Need to change the output pin for the motor
  */
 void set_flywheel_speed(int speed) {
-    if (speed > 255) speed = 255;
-    if (speed < -255) speed = -255;
+    analogWrite(PIN_FLY_EN, speed);
+}
 
-    digitalWrite(PIN_FLY_IN1, true);
-    digitalWrite(PIN_FLY_IN2, false);
-    analogWrite(PIN_FLY_ENA, speed);
+void flywheel_test() {
+    if(Serial.available()) {
+        int val = Serial.parseInt(); // this line is blocking code, beware.
+        Serial.print("You said: ");
+        Serial.println(val);
+
+        set_flywheel_speed(val);
+    }
 }
 
 
@@ -57,21 +58,23 @@ void set_flywheel_speed(int speed) {
 // Helper objects for controlling the launcher feeder
 //-----------------------------------------------------------------
 // Feeder pin definitions
-#define PIN_FEED_STEP 6 // connect to STEP input on Pololu 8825
-#define PIN_FEED_DIR 7  // connect to the DIR input on the pololu 8825
+#define PIN_FEED_STEP 15 // connect to STEP input on Pololu 8825
+#define PIN_FEED_DIR 14  // connect to the DIR input on the pololu 8825
+#define PIN_FEED_EN 13      // control the enable on the pololu
 
 // Helper CONSTANTS
-const uint8_t STEPS_TO_NEXT_BALL = 70;    // Number of steps for the motor to take in order to load the next ball
+const uint8_t STEPS_TO_NEXT_BALL = 74;    // Number of steps for the motor to take in order to load the next ball
 const uint32_t FEEDER_FREQ = 10000;
-const uint32_t FEEDER_CHECK_FREQ = 8000;   // period for checking the that the step count has reached its target steps
 
 // helper variables
 volatile uint16_t step_count = 0;         // count of the number of steps taken on this iteration
 
 // Timers
 IntervalTimer feederStepTimer;
-IntervalTimer loadTimer;
 
+// function prototypes
+void toggle_output_square();
+void pause_feed();
 
 /*-----------------------------------------------------------------
  * Setup the Launcher feeder motor
@@ -84,12 +87,17 @@ void setup_feeder() {
   // setup feeder initial
   digitalWrite(PIN_FEED_STEP, false);
   digitalWrite(PIN_FEED_DIR, true);
+  digitalWrite(PIN_FEED_EN, true);
 }
 
 /*-----------------------------------------------------------------
  * Trigger a rotation to feed in the next ball
  */
 void load_ball() {
+
+    // enable the pololu
+    digitalWrite(PIN_FEED_EN, false);
+    delay(400);
 
     // reset tracking vars
     step_count = 0;
@@ -98,7 +106,13 @@ void load_ball() {
     feederStepTimer.begin(toggle_output_square, FEEDER_FREQ);
     
     // start timer for checking the step count
-    loadTimer.begin(control_feeder, FEEDER_CHECK_FREQ);
+    while(true) {
+        if (step_count >= STEPS_TO_NEXT_BALL) {
+            pause_feed();
+            break;
+        }
+    }
+    Serial.println("Load done");
 }
 
 /*-----------------------------------------------------------------
@@ -111,23 +125,15 @@ void toggle_output_square() {
 }
 
 /*-----------------------------------------------------------------
- * Control the feeder motion 
- */
-void control_feeder() {
-    if (step_count >= STEPS_TO_NEXT_BALL) {
-        pause_feed();
-        loadTimer.end();
-    }
-}
-
-/*-----------------------------------------------------------------
  *  Helper function for stepper motor control - pause the stepper motion, i.e. stop sending rising edges
  */
 void pause_feed() {
   // can just stop the timer from updating the output
   feederStepTimer.end();
-}
 
+  // turn off pololu
+  digitalWrite(PIN_FEED_EN, true);
+}
 
 
 //////////////////////////////////////////////////////////////////

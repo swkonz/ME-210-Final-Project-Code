@@ -80,7 +80,7 @@ void motor_setup() {
  * Try typing numbers from -255 to 255 into serial monitor
  * Put this function in loop.
  */
-void motor_test() {
+void wheel_test() {
     if(Serial.available()) {
         int val = Serial.parseInt(); // this line is blocking code, beware.
         Serial.print("You said: ");

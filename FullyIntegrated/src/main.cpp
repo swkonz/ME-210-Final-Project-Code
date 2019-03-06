@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "motor.h"
 #include "limitswitch.h"
+#include "launcher.h"
 
 
 /* Put this function in loop.
@@ -27,20 +28,21 @@ void setup() {
   Serial.begin(9600);
   motor_setup();
   limit_switch_setup();
+  setupLauncher();
+  delay(2000);
 }
 
 void loop() {
   // motor test code with input from computer
-  // if(Serial.available()) {
-  //   int val = Serial.parseInt(); // try typing numbers from -255 to 255 into serial monitor
-  //   Serial.print("You said: ");
-  //   Serial.println(val);
+  // wheel_test();
 
-  //   set_L_wheel(val);
-  //   set_R_wheel(val);
-  // }
+  // limit_switch_test();
 
-  //limit_switch_test();
+  // simple_wall_bouncing_test();
 
-  simple_wall_bouncing_test();
+  delay(1000);
+  load_ball();
+
+  // flywheel testing
+  // flywheel_test();
 }

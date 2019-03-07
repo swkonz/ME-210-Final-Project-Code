@@ -76,6 +76,23 @@ void motor_setup() {
 }
 
 /**
+ * handle turning the robot by 90 degrees using both motors
+ */
+void handle_turn_ninety() {
+  delay(100);
+  set_L_wheel(100);
+  set_R_wheel(-100);
+
+  // wait this amount of time until at perfect 90 movement
+  delay(600);
+  /**
+   * Alternative to this *****
+   *    Could also rely on the limit switches to indicate that we've moved 90 degrees
+   *    Combining a time delay and a limit switch might lead to a more precise turn
+   */
+}
+
+/**
  * This function tests running both wheels, with input from computer.
  * Try typing numbers from -255 to 255 into serial monitor
  * Put this function in loop.

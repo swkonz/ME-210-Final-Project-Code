@@ -10,7 +10,10 @@ typedef enum {
   START_TO_BACK,
   BACK_TO_AMMO,
   AMMO_TO_LAUNCH1,
-  LAUNCH1
+  LAUNCH1,
+  LAUNCH1_TO_AMMO,
+  AMMO_TO_LAUNCH2,
+  END_STATE
 } state;
 
 /* Put this function in loop.
@@ -33,6 +36,28 @@ void simple_wall_bouncing_test() {
   }
 }
 
+/**
+ * Handle motor movement straight using small debouncing
+ */
+void handle_drive_straight() {
+  while(true) {
+  if (front_left_limit_pressed()) {
+    set_L_wheel(255);
+    set_R_wheel(-255);
+  } else if (left_limit_pressed()) {
+    set_L_wheel(255);
+    set_R_wheel(-200);
+  } else {
+    set_L_wheel(170);
+    set_R_wheel(255);
+  }
+  if(front_limit_pressed()) {
+    stop_wheels();
+    return;
+  }
+  }
+}
+
 ///////////////////////////////////////////////////////
 // Main control function prototypes
 ///////////////////////////////////////////////////////
@@ -40,6 +65,8 @@ void handle_move_to_back();
 void handle_move_to_ammmo();
 void handle_move_to_launch1();
 void handle_launch1();
+void handle_lauch1_to_ammo();
+void handle_ammo_to_launch2();
 
 ///////////////////////////////////////////////////////
 // Global Variables
@@ -82,6 +109,15 @@ void loop() {
   ///////////////////////////////////////////////////////
   // Full motion
   ///////////////////////////////////////////////////////
+  // while(!front_limit_pressed()) {
+  //   set_L_wheel(255);
+  //   set_R_wheel(255);
+  // }
+  // handle_drive_straight();
+  // handle_turn_right_ninety();
+  // delay(3000);
+
+  
   if (current_state == START_TO_BACK) {
     // control to start to back function
     handle_move_to_back();
@@ -94,10 +130,18 @@ void loop() {
   } else if (current_state == LAUNCH1) {
     // control to launch1 function
     handle_launch1();
-  } else {
+  } else if (current_state == LAUNCH1_TO_AMMO) {
+    handle_lauch1_to_ammo();
+  } else if (current_state == AMMO_TO_LAUNCH2) {
+    handle_ammo_to_launch2();
+  } else if(current_state == END_STATE) {
+    stop_wheels();
+    set_flywheel_speed(0);
+  }
+  else {
     stop_wheels();
   }
-
+  
 }
 
 ///////////////////////////////////////////////////////
@@ -126,16 +170,23 @@ void handle_move_to_back() {
  */
 void handle_move_to_ammmo() {
   // turn 90
-  handle_turn_ninety();
+  handle_turn_right_ninety();
 
   // go straight until hitting the ammo button
   while(!front_limit_pressed()) {
-    set_R_wheel(255);
-    set_L_wheel(255);
+    if(left_limit_pressed()) {
+      set_L_wheel(255);
+      set_R_wheel(255);
+    } else {
+      set_R_wheel(255);
+      set_L_wheel(245);             // left spins slightly slower in order to turn a bit to the 
+    }
   }
+  stop_wheels();
 
-  // delay to load the ammo in the feeder - change as needed
-  delay(2000);
+  // delay to load ammo
+  delay(5000);
+
   current_state = AMMO_TO_LAUNCH1;
 }
 
@@ -146,13 +197,21 @@ void handle_move_to_ammmo() {
  */
 void handle_move_to_launch1() {
   // turn 90
-  handle_turn_ninety();
+  handle_turn_right_ninety();
 
+  // handle_drive_straight();
   while(!front_limit_pressed()) {
-    set_R_wheel(255);
-    set_L_wheel(255);
+    if (left_limit_pressed()) {
+      set_L_wheel(255);
+      set_R_wheel(255);
+    } else {
+      set_R_wheel(200);
+      set_L_wheel(185);             // left spins slightly slower in order to turn a bit to the 
+    }
   }
-
+  
+  stop_wheels();
+  current_state = LAUNCH1;  
 }
 
 /**
@@ -163,8 +222,71 @@ void handle_move_to_launch1() {
  */
 void handle_launch1() {
   // turn 90
-  handle_turn_ninety();
+  handle_turn_right_ninety();
+
+  // poition correct andle for first target
+  handle_turn_right_X(330);
+
+  // turn on flywheel
+  set_flywheel_speed(255);
+  delay(10000);
+  Serial.println("done starting flywheel");
 
   // launcher should be pointed at the target - SEND IT
-  load_ball();
+  for(int i=0; i < 3; i++) {
+    load_ball();
+    Serial.println("load ball");
+    delay(500);
+  }
+
+  // adjust position to launch at second target
+
+  for(int i= 0; i < 3; i++) {
+    load_ball();
+    Serial.println("load ball");
+    delay(500);
+  }
+
+  // turn off flywheel
+  set_flywheel_speed(0);
+
+  current_state = END_STATE;
+  // current_state = LAUNCH1_TO_AMMO;
+}
+
+/**
+ * Handle movement from launch 1 back to the ammo button
+ *    - Starts with left and back sides adjacent to the walls at launch1 location
+ */
+void handle_lauch1_to_ammo() {
+  // turn 90 to the left - this is done in order to keep the 
+  handle_turn_left_ninety();
+
+  // drive back to the ammo button - offset to point towards the wall
+  while(!front_limit_pressed()) {
+    set_R_wheel(-200);
+    set_L_wheel(-170); 
+  }
+  stop_wheels();
+
+  // wait for loading
+  delay(5000);
+
+  current_state = AMMO_TO_LAUNCH2;
+}
+
+/**
+ * Handle movement from ammo button to launch 2 location
+ *    - state with the front and the left side facing the walls in the ammo corner
+ */
+void handle_ammo_to_launch2() {
+  
+  // move back up to launch1 position
+  while(!front_limit_pressed()) {
+    set_R_wheel(200);
+    set_L_wheel(170); 
+  }
+  stop_wheels();
+
+
 }

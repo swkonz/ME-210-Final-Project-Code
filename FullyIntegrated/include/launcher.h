@@ -63,8 +63,8 @@ void flywheel_test() {
 #define PIN_FEED_EN 13      // control the enable on the pololu
 
 // Helper CONSTANTS
-const uint8_t STEPS_TO_NEXT_BALL = 74;    // Number of steps for the motor to take in order to load the next ball
-const uint32_t FEEDER_FREQ = 10000;
+const uint8_t STEPS_TO_NEXT_BALL = 70;    // Number of steps for the motor to take in order to load the next ball
+const uint32_t FEEDER_FREQ = 13000;
 
 // helper variables
 volatile uint16_t step_count = 0;         // count of the number of steps taken on this iteration
@@ -83,6 +83,7 @@ void setup_feeder() {
       // setup feeder motor pins
   pinMode(PIN_FEED_DIR, OUTPUT);
   pinMode(PIN_FEED_STEP, OUTPUT);
+  pinMode(PIN_FEED_EN, OUTPUT);
 
   // setup feeder initial
   digitalWrite(PIN_FEED_STEP, false);
@@ -97,7 +98,7 @@ void load_ball() {
 
     // enable the pololu
     digitalWrite(PIN_FEED_EN, false);
-    delay(400);
+    delay(200);
 
     // reset tracking vars
     step_count = 0;
@@ -112,7 +113,7 @@ void load_ball() {
             break;
         }
     }
-    Serial.println("Load done");
+    digitalWrite(PIN_FEED_EN, true);
 }
 
 /*-----------------------------------------------------------------
@@ -168,6 +169,7 @@ void setupLauncher() {
  * Handle all mechanisms for launching a ball
  */
 void launch_ball() {
+
     // actually start the motor for the feeder
     load_ball();
 

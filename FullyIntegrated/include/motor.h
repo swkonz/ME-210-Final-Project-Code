@@ -17,6 +17,8 @@
 /*********************************************************************
  * Motor control functions
  */
+void handle_turn_left_X(uint16_t waitAmount);
+void handle_turn_right_X(uint16_t waitAmount);
 
 /**
  * speed = 1 to 255 to move forward
@@ -78,19 +80,52 @@ void motor_setup() {
 /**
  * handle turning the robot by 90 degrees using both motors
  */
-void handle_turn_ninety() {
+void handle_turn_right_ninety() {
   delay(100);
+// back up very briefly to get rid of wall friction
+  set_L_wheel(-200);
+  set_R_wheel(-200);
+  delay(240);
+  stop_wheels();
+
+  handle_turn_right_X(1850);
+}
+
+void handle_turn_left_ninety() {
+  delay(100);
+// back up very briefly to get rid of wall friction
+  // removed this for now since we don't need it when the function is called. bad style oops lol
+  // set_L_wheel(-200);
+  // set_R_wheel(-200);
+  // delay(240);
+  // stop_wheels();
+
+  handle_turn_left_X(1850);
+}
+
+
+
+/**
+ * Handle turning the robot a certain amount defined by the amount of time to wait while turning
+ *     - Robot should already have moved off of the wall before the function is called
+ */
+void handle_turn_right_X(uint16_t waitAmount) {
+  delay(100);
+
   set_L_wheel(100);
   set_R_wheel(-100);
+  delay(waitAmount);
+  stop_wheels();
+} 
 
-  // wait this amount of time until at perfect 90 movement
-  delay(600);
-  /**
-   * Alternative to this *****
-   *    Could also rely on the limit switches to indicate that we've moved 90 degrees
-   *    Combining a time delay and a limit switch might lead to a more precise turn
-   */
-}
+void handle_turn_left_X(uint16_t waitAmount) {
+  delay(100);
+
+  set_L_wheel(-100);
+  set_R_wheel(100);
+  delay(waitAmount);
+  stop_wheels();
+} 
 
 /**
  * This function tests running both wheels, with input from computer.

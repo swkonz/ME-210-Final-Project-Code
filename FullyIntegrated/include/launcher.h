@@ -60,7 +60,7 @@ void flywheel_test() {
 #define PIN_FEED_EN 13      // control the enable on the pololu
 
 // Helper CONSTANTS
-const uint8_t STEPS_TO_NEXT_BALL = 74;    // Number of steps for the motor to take in order to load the next ball
+const uint8_t STEPS_TO_NEXT_BALL = 70;    // Number of steps for the motor to take in order to load the next ball
 const uint32_t FEEDER_FREQ = 10000;
 
 // helper variables

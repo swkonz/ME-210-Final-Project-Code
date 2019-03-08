@@ -85,10 +85,10 @@ void handle_turn_right_ninety() {
 // back up very briefly to get rid of wall friction
   set_L_wheel(-200);
   set_R_wheel(-200);
-  delay(240);
+  delay(250);
   stop_wheels();
 
-  handle_turn_right_X(1850);
+  handle_turn_right_X(1940);
 }
 
 void handle_turn_left_ninety() {
@@ -100,7 +100,7 @@ void handle_turn_left_ninety() {
   // delay(240);
   // stop_wheels();
 
-  handle_turn_left_X(1850);
+  handle_turn_left_X(1920);
 }
 
 

@@ -30,9 +30,6 @@ void setup_flywheel() {
  *      speed = 1 to 255 to move forward
  *      speed = 0 to stop
  *      speed = -1 -255 to move back
- * 
- * TODO: change this to use a pwm output 
- *      - Need to change the output pin for the motor
  */
 void set_flywheel_speed(int speed) {
     analogWrite(PIN_FLY_EN, speed);
@@ -63,8 +60,8 @@ void flywheel_test() {
 #define PIN_FEED_EN 13      // control the enable on the pololu
 
 // Helper CONSTANTS
-const uint8_t STEPS_TO_NEXT_BALL = 70;    // Number of steps for the motor to take in order to load the next ball
-const uint32_t FEEDER_FREQ = 13000;
+const uint8_t STEPS_TO_NEXT_BALL = 74;    // Number of steps for the motor to take in order to load the next ball
+const uint32_t FEEDER_FREQ = 10000;
 
 // helper variables
 volatile uint16_t step_count = 0;         // count of the number of steps taken on this iteration
@@ -113,6 +110,7 @@ void load_ball() {
             break;
         }
     }
+    delay(200);
     digitalWrite(PIN_FEED_EN, true);
 }
 
@@ -132,8 +130,6 @@ void pause_feed() {
   // can just stop the timer from updating the output
   feederStepTimer.end();
 
-  // turn off pololu
-  digitalWrite(PIN_FEED_EN, true);
 }
 
 

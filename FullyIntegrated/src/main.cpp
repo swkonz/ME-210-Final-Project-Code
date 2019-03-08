@@ -117,7 +117,13 @@ void loop() {
   // handle_turn_right_ninety();
   // delay(3000);
 
-  
+  // Testing the load ball mechanism
+  while(true) {
+    delay(2000);
+    load_ball();
+  }
+
+  /*
   if (current_state == START_TO_BACK) {
     // control to start to back function
     handle_move_to_back();
@@ -141,6 +147,7 @@ void loop() {
   else {
     stop_wheels();
   }
+  */
   
 }
 

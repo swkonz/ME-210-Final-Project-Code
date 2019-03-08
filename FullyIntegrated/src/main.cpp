@@ -237,7 +237,6 @@ void handle_launch1() {
   // turn on flywheel
   set_flywheel_speed(255);
   delay(10000);
-  Serial.println("done starting flywheel");
 
   // launcher should be pointed at the target - SEND IT
   for(int i=0; i < 3; i++) {
@@ -257,7 +256,7 @@ void handle_launch1() {
   // turn off flywheel
   set_flywheel_speed(0);
 
-  current_state = END_STATE;
+  current_state = LAUNCH1_TO_AMMO;
   // current_state = LAUNCH1_TO_AMMO;
 }
 
@@ -293,7 +292,31 @@ void handle_ammo_to_launch2() {
     set_R_wheel(200);
     set_L_wheel(170); 
   }
+
+  // turn right towards the center
+  handle_turn_right_ninety();
+
+  delay(1000);
+
+  // stop at center
   stop_wheels();
 
+  // turn 90 for launching
+  handle_turn_right_ninety();
+
+  // turn on flywheel
+  set_flywheel_speed(255);
+  delay(10000);
+
+  // launch all balls at the center tower
+  for(int i = 0; i < 6; i++) {
+    load_ball();
+    delay(200);
+  }
+
+  // turn off flywheel
+  set_flywheel_speed(0);
+
+  current_state = END_STATE;
 
 }

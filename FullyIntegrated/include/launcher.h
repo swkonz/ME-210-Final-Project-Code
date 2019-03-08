@@ -65,7 +65,7 @@ const uint32_t FEEDER_FREQ = 10000;
 
 // helper variables
 volatile uint16_t step_count = 0;         // count of the number of steps taken on this iteration
-
+volatile bool step_state = false;
 // Timers
 IntervalTimer feederStepTimer;
 
@@ -83,7 +83,7 @@ void setup_feeder() {
   pinMode(PIN_FEED_EN, OUTPUT);
 
   // setup feeder initial
-  digitalWrite(PIN_FEED_STEP, false);
+  digitalWrite(PIN_FEED_STEP, step_state);
   digitalWrite(PIN_FEED_DIR, true);
   digitalWrite(PIN_FEED_EN, true);
 }
@@ -119,7 +119,8 @@ void load_ball() {
  *    This controls the output square wave being sent to the pololu DRV8825 driver for the feeder stepper motor
  */
 void toggle_output_square() {
-    digitalWrite(PIN_FEED_STEP, !digitalRead(PIN_FEED_STEP));
+    step_state = !step_state;
+    digitalWrite(PIN_FEED_STEP, step_state);
     step_count++;
 }
 

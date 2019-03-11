@@ -9,6 +9,8 @@
 
 #include <Arduino.h>
 
+extern void (unsigned long time);
+
 #define PIN_IN1 20 // connect this pin to LM298N Breakout, must be PWM
 #define PIN_IN2 19 // connect this pin to LM298N Breakout
 #define PIN_IN3 18 // connect this pin to LM298N Breakout

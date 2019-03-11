@@ -1,5 +1,8 @@
 #include <Arduino.h>
 
+extern void stop_if_time_limit_reached();
+extern void my_delay(unsigned long time);
+
 //////////////////////////////////////////////////////////////////
 // Functions and objects for controlling the Flywheel launcher motor
 //      - motor should always be running, just at variable speeds
@@ -60,7 +63,7 @@ void flywheel_test() {
 #define PIN_FEED_EN 13      // control the enable on the pololu
 
 // Helper CONSTANTS
-const uint8_t STEPS_TO_NEXT_BALL = 70;    // Number of steps for the motor to take in order to load the next ball
+const uint8_t STEPS_TO_NEXT_BALL = 66;    // Number of steps for the motor to take in order to load the next ball
 const uint32_t FEEDER_FREQ = 10000;
 
 // helper variables
@@ -95,7 +98,7 @@ void load_ball() {
 
     // enable the pololu
     digitalWrite(PIN_FEED_EN, false);
-    delay(200);
+    delay(1);
 
     // reset tracking vars
     step_count = 0;
@@ -105,12 +108,13 @@ void load_ball() {
     
     // start timer for checking the step count
     while(true) {
-        if (step_count >= STEPS_TO_NEXT_BALL) {
+        stop_if_time_limit_reached();
+        if (step_count >= STEPS_TO_NEXT_BALL ) {
             pause_feed();
             break;
         }
     }
-    delay(200);
+    delay(1);
     digitalWrite(PIN_FEED_EN, true);
 }
 

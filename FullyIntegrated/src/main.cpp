@@ -13,6 +13,7 @@ typedef enum {
   LAUNCH1,
   LAUNCH1_TO_AMMO,
   AMMO_TO_LAUNCH2,
+  LAUNCH2_TO_LAUNCH3,
   END_STATE
 } state;
 
@@ -36,25 +37,19 @@ void simple_wall_bouncing_test() {
   }
 }
 
-/**
- * Handle motor movement straight using small debouncing
- */
-void handle_drive_straight() {
-  while(true) {
-  if (front_left_limit_pressed()) {
-    set_L_wheel(255);
-    set_R_wheel(-255);
-  } else if (left_limit_pressed()) {
-    set_L_wheel(255);
-    set_R_wheel(-200);
-  } else {
-    set_L_wheel(170);
-    set_R_wheel(255);
-  }
-  if(front_limit_pressed()) {
+void stop_if_time_limit_reached() {
+  if(millis() > 120000) { // 2 mins, for error margin
     stop_wheels();
-    return;
+    set_flywheel_speed(0);
+    digitalWrite(PIN_FLY_EN, HIGH); // disable stepper (idk if i wrote this right)
+    while(true);
   }
+}
+
+void my_delay(unsigned long time) {
+  unsigned long end_time = millis() + time;
+  while(millis() < end_time) {
+    stop_if_time_limit_reached();
   }
 }
 
@@ -68,21 +63,19 @@ void handle_launch1();
 void handle_lauch1_to_ammo();
 void handle_ammo_to_launch2();
 void auto_shutdown();
+void handle_launch2_to_launch3();
 
 ///////////////////////////////////////////////////////
 // Global Variables
 ///////////////////////////////////////////////////////
 state current_state;
-uint8_t launch_count;
 
 void setup() {
-  // Serial.begin(9600);
+  Serial.begin(9600);
   motor_setup();
   limit_switch_setup();
   setupLauncher();
   delay(2000);
-
-  launch_count = 0;
 
   ///////////////////////////////////////////////////////
   // Setup state machine
@@ -94,28 +87,11 @@ void loop() {
 
   // set_flywheel_speed(255);
   // delay(10000);
-  // load_ball();
-  // delay(1500);
-
-  // // Testing the load ball mechanism
-  // delay(2000);
-  // load_ball();
-
-  // set_flywheel_speed(255);
-  // delay(10000);
   // for(int i = 0; i < 6; i++) {
   //   load_ball();
-  //   // delay(150);
+  //   delay(400);
   // }
-  // delay(3000);
 
-  // set_flywheel_speed(255);
-  // delay(5000);
-
-  // load_ball();
-  // delay(10000);
-  // set_flywheel_speed(0);
-  // delay(10000);
   
   if (current_state == START_TO_BACK) {
     // control to start to back function
@@ -136,6 +112,8 @@ void loop() {
   } else if(current_state == END_STATE) {
     stop_wheels();
     set_flywheel_speed(0);
+  } else if(current_state == LAUNCH2_TO_LAUNCH3) {
+    handle_launch2_to_launch3();
   } else {
     stop_wheels();
   } 
@@ -154,6 +132,7 @@ void loop() {
  */
 void handle_move_to_back() {
   while(!front_limit_pressed()) {
+    stop_if_time_limit_reached();
     set_L_wheel(255);
     set_R_wheel(255);
   }
@@ -172,6 +151,7 @@ void handle_move_to_ammmo() {
 
   // go straight until hitting the ammo button
   while(!front_limit_pressed()) {
+    stop_if_time_limit_reached();
     if(left_limit_pressed()) {
       set_L_wheel(255);
       set_R_wheel(255);
@@ -197,14 +177,14 @@ void handle_move_to_launch1() {
   // turn 90
   handle_turn_right_ninety();
 
-  // handle_drive_straight();
   while(!front_limit_pressed()) {
+    stop_if_time_limit_reached();
     if (left_limit_pressed()) {
       set_L_wheel(255);
       set_R_wheel(255);
     } else {
       set_R_wheel(200);
-      set_L_wheel(185);             // left spins slightly slower in order to turn a bit to the 
+      set_L_wheel(185);  
     }
   }
   
@@ -223,7 +203,7 @@ void handle_launch1() {
   handle_turn_right_ninety();
 
   // turn back slightly
-  handle_turn_left_X(180);
+  handle_turn_left_X(280);
 
   // turn on flywheel
   set_flywheel_speed(255);
@@ -234,7 +214,7 @@ void handle_launch1() {
     load_ball();
     delay(300);
 
-    handle_turn_right_X(100);
+    handle_turn_right_X(80);
     delay(150);
   }
 
@@ -242,14 +222,7 @@ void handle_launch1() {
   set_flywheel_speed(0);
   delay(1000);
 
-  // current_state = END_STATE;
-  if (launch_count < 2) {
-    current_state = LAUNCH1_TO_AMMO;
-    launch_count++;
-  } else {
-    current_state = END_STATE;
-  }
-
+  current_state = LAUNCH1_TO_AMMO;
 }
 
 /**
@@ -258,10 +231,12 @@ void handle_launch1() {
  */
 void handle_lauch1_to_ammo() {
 
+  Serial.println("start move from launch1 - > ammo");
+
   // more forward a bit to get away from the wall
   set_L_wheel(255);
   set_R_wheel(255);
-  delay(1000);
+  delay(800);
   stop_wheels();
 
   delay(200);
@@ -272,10 +247,11 @@ void handle_lauch1_to_ammo() {
 
   // turn a bit back to align
   // handle_turn_left_X(200);
-  handle_turn_right_X(200);
+  handle_turn_right_X(80);
 
   // drive back to the ammo button - offset to point towards the wall
   while(!front_limit_pressed()) {
+    stop_if_time_limit_reached();
     set_R_wheel(255);
     set_L_wheel(255); 
   }
@@ -285,8 +261,11 @@ void handle_lauch1_to_ammo() {
   // turn right to the ammo button
   handle_turn_right_ninety();
 
+  handle_turn_right_X(270);
+
   // drive into the ammo button
   while(!front_limit_pressed()) {
+    stop_if_time_limit_reached();
     set_R_wheel(200);
     set_L_wheel(180); 
   }
@@ -297,9 +276,9 @@ void handle_lauch1_to_ammo() {
 
   // wait for loading
   delay(5000);
-  // Serial.println("done waiting for load");
+  Serial.println("done waiting for load");
 
-  current_state = AMMO_TO_LAUNCH1;
+  current_state = AMMO_TO_LAUNCH2;
 }
 
 /**
@@ -308,11 +287,14 @@ void handle_lauch1_to_ammo() {
  */
 void handle_ammo_to_launch2() {
 
+  Serial.println("entering launch ammo->2");
+
   // turn 90
   handle_turn_right_ninety();
 
   // handle_drive_straight();
   while(!front_limit_pressed()) {
+    stop_if_time_limit_reached();
     if (left_limit_pressed()) {
       set_L_wheel(255);
       set_R_wheel(255);
@@ -328,9 +310,9 @@ void handle_ammo_to_launch2() {
   handle_turn_right_ninety();
 
   // drive to the center
-  set_L_wheel(180);
+  set_L_wheel(170);
   set_R_wheel(200);
-  delay(3700);
+  delay(3880); //3780
 
   // stop at center
   stop_wheels();
@@ -340,15 +322,64 @@ void handle_ammo_to_launch2() {
   delay(10000);
 
   // launcher should be pointed at the target - SEND IT
-  for(int i=0; i < 6; i++) {
+  for(int i=0; i < 3; i++) {
     load_ball();
-    delay(300);
+    delay(400);
 
+    // handle_turn_right_X(40);
+    // delay(150);
+    set_flywheel_speed(180);
+    if(i == 0) {
+      delay(2000);
+    }
   }
 
   // turn off flywheel
   set_flywheel_speed(0);
-  delay(1000);
+  delay(100);
+
+  Serial.println("entering launch2->3");
+
+
+  current_state = LAUNCH2_TO_LAUNCH3;
+
+}
+
+/**
+ * 
+ */
+void handle_launch2_to_launch3() {
+  Serial.println("entering launch2->3");
+
+  // drive to next launch
+  set_L_wheel(180);
+  set_R_wheel(200);
+  delay(4200); // 3700
+
+  stop_wheels();
+
+  // turn on flywheel
+  set_flywheel_speed(255);
+  delay(10000);
+
+  // launcher should be pointed at the target - SEND IT
+  for(int i=0; i < 3; i++) {
+    load_ball();
+    delay(400);
+    Serial.println("launch");
+
+    // handle_turn_right_X(40);
+    // delay(150);
+    // set_flywheel_speed(180);
+    // if(i == 0) {
+    //   delay(2000);
+    // }
+  }
+
+  // turn off flywheel
+  set_flywheel_speed(0);
+  delay(1000);  
+  Serial.println("done launching stuff at launch3");
 
   current_state = END_STATE;
 

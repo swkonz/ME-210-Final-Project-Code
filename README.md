@@ -1,5 +1,5 @@
 # ME-210-Final-Project
-Code Repo for Stanford's ME 210 Final project. Building a 'siege-robot' based on specifications provided by the course staff
+Code Repo for Stanford's ME 210 Final project. Building a 'siege-robot' based on specifications provided by the course staff. For more details on the robot, see the project webpage: https://wintetheroomba.weebly.com/
 
 ## To Use:
 - To pull from the repo `git clone https://github.com/swkonz/ME-210-Final-Project-Code.git`
